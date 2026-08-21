@@ -410,6 +410,54 @@ section { padding: 96px 0; }
 .comparison-table th.col-criteria { background: #fff; color: var(--text); font-weight: 700; }
 .comparison-table th.col-cpa { background: var(--secondary); }
 .comparison-table th.col-ca { background: var(--primary); }
+.comparison-table .flag-icon {
+  display: inline-block;
+  width: 18px;
+  height: 12px;
+  margin-right: 8px;
+  border-radius: 2px;
+  vertical-align: -1px;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.35);
+  position: relative;
+}
+.comparison-table .flag-us {
+  background: repeating-linear-gradient(
+    to bottom,
+    #B22234 0,
+    #B22234 0.92px,
+    #FFFFFF 0.92px,
+    #FFFFFF 1.84px
+  );
+}
+.comparison-table .flag-us::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 42%;
+  height: 54%;
+  background: #3C3B6E;
+  border-top-left-radius: 2px;
+}
+.comparison-table .flag-in {
+  background: linear-gradient(
+    to bottom,
+    #FF9933 0 33.33%,
+    #FFFFFF 33.33% 66.66%,
+    #138808 66.66% 100%
+  );
+}
+.comparison-table .flag-in::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 3px;
+  height: 3px;
+  margin: -1.5px 0 0 -1.5px;
+  border-radius: 50%;
+  background: #000080;
+}
 
 .comparison-table td {
   padding: 20px 24px;
@@ -551,6 +599,14 @@ section { padding: 96px 0; }
   height: auto;
   border-radius: calc(var(--card-radius) - 8px);
   object-fit: contain;
+  opacity: 1;
+  transform: scale(1);
+  transition: opacity 0.32s ease, transform 0.32s ease;
+}
+.service-image img.is-fading { opacity: 0.14; transform: scale(0.985); }
+
+@media (prefers-reduced-motion: reduce) {
+  .service-image img { transition: none; }
 }
 
 /* ---------- 9. Method ---------- */

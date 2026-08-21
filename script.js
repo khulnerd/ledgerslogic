@@ -67,6 +67,79 @@
   var regionButtons = document.querySelectorAll(".region-btn");
   var servicePanels = document.querySelectorAll(".service-list[data-region-panel]");
   var servicesImage = document.getElementById("servicesImage");
+  var servicesImageSwapToken = 0;
+
+  var regionServiceImages = {
+    usa: [
+      "./assets/services/usservices3.webp",
+      "./assets/services/usservices5.webp",
+      "./assets/services/usservices4.webp",
+      "./assets/services/usservices6.webp",
+      "./assets/services/usservices7.webp"
+    ],
+    india: [
+      "./assets/services/indiaservices3.webp",
+      "./assets/services/indiaservices4.webp",
+      "./assets/services/indiaservices5.webp",
+      "./assets/services/indiaservices6.webp",
+      "./assets/services/indiaservices7.webp"
+    ]
+  };
+
+  function updateServicesImage(src, alt) {
+    if (!servicesImage || !src) return;
+    if (alt) servicesImage.alt = alt;
+    if (servicesImage.getAttribute("src") === src) return;
+
+    var swapToken = ++servicesImageSwapToken;
+    servicesImage.classList.add("is-fading");
+
+    setTimeout(function () {
+      if (swapToken !== servicesImageSwapToken) return;
+
+      function clearFade() {
+        if (swapToken !== servicesImageSwapToken) return;
+        servicesImage.classList.remove("is-fading");
+        servicesImage.removeEventListener("load", clearFade);
+        servicesImage.removeEventListener("error", clearFade);
+      }
+
+      servicesImage.addEventListener("load", clearFade);
+      servicesImage.addEventListener("error", clearFade);
+      servicesImage.src = src;
+
+      if (servicesImage.complete) clearFade();
+    }, 170);
+  }
+
+  function setServicesImageForItem(item, region) {
+    if (!servicesImage || !item) return;
+
+    var list = item.closest(".service-list[data-region-panel]");
+    if (!list) return;
+
+    var items = Array.prototype.slice.call(list.querySelectorAll(".service-item"));
+    var index = items.indexOf(item);
+    var mapped = regionServiceImages[region] && regionServiceImages[region][index];
+    var titleEl = item.querySelector(".service-item-title");
+
+    if (mapped) {
+      updateServicesImage(mapped, titleEl ? titleEl.textContent.trim() + " illustration" : "");
+      return;
+    }
+
+    var src = servicesImage.dataset[region + "Src"];
+    var alt = servicesImage.dataset[region + "Alt"];
+    updateServicesImage(src, alt);
+  }
+
+  function syncServicesImageToOpenItem(region) {
+    var panel = document.querySelector('.service-list[data-region-panel="' + region + '"]');
+    if (!panel) return;
+
+    var activeItem = panel.querySelector(".service-item.is-open") || panel.querySelector(".service-item");
+    setServicesImageForItem(activeItem, region);
+  }
 
   function setRegion(region) {
     regionButtons.forEach(function (btn) {
@@ -77,12 +150,7 @@
     servicePanels.forEach(function (panel) {
       panel.classList.toggle("is-hidden", panel.dataset.regionPanel !== region);
     });
-    if (servicesImage) {
-      var src = servicesImage.dataset[region + "Src"];
-      var alt = servicesImage.dataset[region + "Alt"];
-      if (src) servicesImage.src = src;
-      if (alt) servicesImage.alt = alt;
-    }
+    syncServicesImageToOpenItem(region);
   }
 
   regionButtons.forEach(function (btn) {
@@ -118,8 +186,16 @@
 
       item.classList.toggle("is-open", willOpen);
       toggle.setAttribute("aria-expanded", String(willOpen));
+
+      if (willOpen) {
+        var parentPanel = item.closest(".service-list[data-region-panel]");
+        if (parentPanel) setServicesImageForItem(item, parentPanel.dataset.regionPanel);
+      }
     });
   });
+
+  var activeRegionBtn = document.querySelector(".region-btn.is-active") || regionButtons[0];
+  if (activeRegionBtn) syncServicesImageToOpenItem(activeRegionBtn.dataset.region);
 
   /* ---------- Contact form validation + submission ---------- */
   // 1) Email notification via EmailJS (emailjs.com) — fill these in from your EmailJS dashboard.
